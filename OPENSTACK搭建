@@ -1,0 +1,69 @@
+#openstack --准备
+#前提：虚机与外部网络相通    例子：本机ip为  192.168.100.100
+修改hosts文件
+echo 192.168.100.100 contriller >> /etc/hosts
+echo 192.168.100.200 contriller >> /etc/hosts
+#关闭防火墙
+systemctl stop firewall & systemctl disable firewalld
+#关闭SeLinux
+sed -i 's#SELINUX=enforcing#SELINUX=disabled#g' /etc/selinux/config
+#安装同步时间工具
+yum -y install chrony
+#启动时间同步服务
+systemctl enable chronyd  &    systemctl start chronyd
+timedatectl set-timezone Asia/Shanghai
+#安装基础包
+yum install -y centos-release-openstack-stein python-openstackclient openstack-utils
+#安装计算节点
+克隆 192.168.100.100 机器
+跟改为 192.168.100.200
+修改hosts文件
+echo 192.168.100.100 contriller >> /etc/hosts
+echo 192.168.100.200 contriller >> /etc/hosts
+#关闭防火墙
+systemctl stop firewall & systemctl disable firewalld
+#关闭SeLinux
+sed -i 's#SELINUX=enforcing#SELINUX=disabled#g' /etc/selinux/config
+#安装同步时间工具
+yum -y install chrony
+sed -i '/^server/d'/etc/chrony.conf
+sed -i '2aserver controller iburst'/etc/chrony.conf
+#启动时间同步服务
+systemctl enable chronyd  &    systemctl start chronyd
+timedatectl set-timezone Asia/Shanghai
+#安装基础包
+yum install -y centos-release-openstack-stein python-openstackclient openstack-utils
+测试两台机器是否相同
+ping controller -c 4
+ping compute -c 4
+#控制节点安装  KeyStone
+安装MariaDB
+yum -y install mariadb mariadb-server MySQL-python
+#配置
+vi /etc/my.cnf.d/openstack.cnf
+
+torage-engine = innodb
+innodb_file_per_table
+collation-server = utf8_general_ci
+init-connect = 'SET NAMES utf8'
+character-set-server = utf8
+
+#启动数据库 并将其配置为自启
+systemctl start mariadb  &  systenctl enable mariadb
+#对数据库进行安全加固 设置root密码
+mysql_secure_installation
+
+#安装消息队列
+yum install -y rabbitmq-server
+启动
+systemctl enable rabbitmq-server & systemctl start rabbitmq-server
+创建用户
+rabbitmqctl add_user openstack openstack
+授权
+rabbitmqctl set_permissions openstack ".*" ".*" ".*" 
+增加用户
+rabbitmqctl set_user_tags openstack administrator
+启动WEB管理界面
+rabbitmq-plugins list
+rebbitmq-plugins enable rabbitmq_management
+http://192.168.100.100:15672
