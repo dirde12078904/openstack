@@ -1,0 +1,41 @@
+opnstack ---单-机-搭-建---
+#前提虚机或机器联网
+#准备 为本主机IP：192.168.100.100
+systemctl stop firewalld
+systemctl disable firewalld
+setenforce 0
+vi /etc/selinux/config
+SELINUX=disabled
+vi /etc/ssh/sshd_config
+UseDNS no
+systemctl restart sshd
+hostnamectl set-hostname openstack.alione.local
+logout
+vi /etc/host
+192.168.100.100       openstack.alione.local
+ssh-keygen
+ssh-copy-id -i /root/.ssh/id_rsa.pub root@192.168.100.100
+ssh  'root@192.168.100.100'
+systemctl stop firewalld
+systemctl disable firewalld
+systemctl stop NetwrokManger
+systemctl disable NetworkManger
+wget -O /etc/yum.repos.d/CentOS-Base.repo https://mirrors.aliyun.com/repo/Centos-7.repo
+yum clean all
+yum makecache
+yum install -y bash-completion vim telnet bridge-uils yum-utils
+bash
+yum -y update
+reboot
+yum install centos-release-oprnstack-train -y
+yum list | grep openstack*
+yum -y install centos-release-openstack-train.noarch
+cd /etc/yum.repos.d
+cp CentOS-OpenStack-train{,.bak}
+vim CentOS-OpenSteack-train.repo
+[centos-openstack-train]
+baseurl=htttp://mirrors.aliyun.com
+yum makecache
+yum install -y openstack-packstack
+packstack --allinone
+cat keystonerc_admin
