@@ -31,7 +31,7 @@ yum install centos-release-openstack-train -y
 yum list | grep openstack*
 yum -y install centos-release-openstack-train.noarch
 cd /etc/yum.repos.d
-cp CentOS-OpenStack-train{,.bak}
+cp CentOS-OpenStack-train.repo CentOS-OpenStack-train.2.repo
 vim CentOS-OpenSteack-train.repo
 [centos-openstack-train]
 baseurl=htttp://mirrors.aliyun.com
