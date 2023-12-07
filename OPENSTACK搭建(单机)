@@ -27,7 +27,7 @@ yum install -y bash-completion vim telnet bridge-uils yum-utils
 bash
 yum -y update
 reboot
-yum install centos-release-oprnstack-train -y
+yum install centos-release-openstack-train -y
 yum list | grep openstack*
 yum -y install centos-release-openstack-train.noarch
 cd /etc/yum.repos.d
