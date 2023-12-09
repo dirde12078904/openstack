@@ -39,3 +39,4 @@ yum makecache
 yum install -y openstack-packstack
 packstack --allinone
 cat keystonerc_admin
+tail -f 
