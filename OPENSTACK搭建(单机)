@@ -11,7 +11,7 @@ cat /etc/selinux/config
 #如果没有进入 改为disabled
 vi /etc/selinux/config
 SELINUX=disabled
-#SSH OpenStack 跟这个有冲突
+#因为UseDNS开的话会影响到SSH 有一定风险卡住或报错 最好的方法是把这个关掉
 vi /etc/ssh/sshd_config
 UseDNS no
 #重启SSH
