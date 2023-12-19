@@ -1,42 +1,62 @@
-opnstack ---单-机-搭-建---
+opnstack   本实验建议用 CentOS7-2009                                                                ---单-机-搭-建---
 #前提虚机或机器联网
 #准备 为本主机IP：192.168.100.100
+#我们先关掉防火墙 --- 并设置防火墙开机禁止启动
 systemctl stop firewalld
 systemctl disable firewalld
 setenforce 0
+#查看SElinux是否关闭
+cat /etc/selinux/config
+#看到SELINUX=disabled,就是已经关闭了
+#如果没有进入 改为disabled
 vi /etc/selinux/config
 SELINUX=disabled
+#SSH OpenStack 跟这个有冲突
 vi /etc/ssh/sshd_config
 UseDNS no
+#重启SSH
 systemctl restart sshd
+#更改主机名
 hostnamectl set-hostname openstack.alione.local
+#如果是远程连接用下方这个刷新
 logout
+#如果是主机那就重启
+reboot
+#设置本地DNS
 vi /etc/host
 192.168.100.100       openstack.alione.local
+#设置主机IP免密  本机IP为192.168.100.100 如果不一样可在命令里安情况更改
 ssh-keygen
 ssh-copy-id -i /root/.ssh/id_rsa.pub root@192.168.100.100
+#可查看免密设置是否成功
 ssh  'root@192.168.100.100'
-systemctl stop firewalld
-systemctl disable firewalld
+#停止NetwrokManger服务  这个在启动Openstack时 有冲突
 systemctl stop NetwrokManger
+#开机停止启动   NetwrokManger
 systemctl disable NetworkManger
+#这个是阿里云的CentOS7镜像 YUM
 wget -O /etc/yum.repos.d/CentOS-Base.repo https://mirrors.aliyun.com/repo/Centos-7.repo
+#清除一下yum上的云数据
 yum clean all
+#下载yum上的云数据
 yum makecache
+#下载Openstack 所需要的配置编辑文件
 yum install -y bash-completion vim telnet bridge-uils yum-utils
+#把之前做的 给内核解析一下
 bash
+#用YUM升级刷新每个版本的软件包
 yum -y update
+#然后重启 这步主要是把系统刷新一下
 reboot
+#本次下载的是Openstack-Train版本
 yum install centos-release-openstack-train -y
+#用YUM 查看openstack的所有内置包
 yum list | grep openstack*
+#这是这个Openstack的补丁  我们用YUM一起下载了
 yum -y install centos-release-openstack-train.noarch
-cd /etc/yum.repos.d
-cp CentOS-OpenStack-train.repo CentOS-OpenStack-train.2.repo
-vim CentOS-OpenSteack-train.repo
-[centos-openstack-train]
-baseurl=htttp://mirrors.aliyun.com
-yum makecache
+#这是自动安装配置OPENSTACK的工具 PACKSTACK 也用YUM下载 我们一会安装时用的重要工具
 yum install -y openstack-packstack
+#用PACKSTACK正式开始安装OPENSTACK
 packstack --allinone
+#安装成功后 可以在 keystonerc_admin查看密码-账户
 cat keystonerc_admin
-tail -f 
